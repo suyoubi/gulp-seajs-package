@@ -1,0 +1,42 @@
+{
+  "name": "gulp-seajs-package",
+  "version": "0.0.1",
+  "description": "seajs(CMD) Module combo pulgin for gulp",
+  "homepage": "",
+  "author": {
+    "name": "",
+    "email": "",
+    "url": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "main": "index.js",
+  "keywords": [
+    "gulpplugin",
+    "seajs",
+    "cmd",
+    "combo"
+  ],
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "glob-stream": "^4.1.1",
+    "graceful-fs": "^3.0.6",
+    "gulp-util": "^3.0.0",
+    "promise": "^6.1.0",
+    "strip-bom": "^1.0.0",
+    "through2": "^0.6.0",
+    "vinyl": "^0.4.6"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-handlebars": "^4.0.0",
+    "gulp-wrap": "^0.11.0",
+    "should": "^4.6.5",
+    "stream-assert": "^2.0.2"
+  },
+  "license": "MIT"
+}
