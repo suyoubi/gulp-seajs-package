@@ -1,4 +1,4 @@
-# gulp-seajs-combo
+# gulp-seajs-package
 
 ***
 > seajs(CMD) Module combo pulgin for gulp
@@ -6,29 +6,36 @@
 ## Install
 
 ```
-$ npm install --save-dev gulp-seajs-combo
+$ npm install --save-dev gulp-seajs-package
 ```
 
 ## Usage
 
 ```
 var gulp = require( 'gulp' ),
-    seajsCombo = require( 'gulp-seajs-combo' );
+    seajsPackage = require( 'gulp-seajs-package' );
     
-gulp.task( 'seajscombo', function(){
-    return gulp.src( 'src/js/main.js' )
-        .pipe( seajsCombo() )
-        .pipe( gulp.task('build/js') );
+gulp.task( 'seajspackage', function(){
+    return gulp.src( 'src/**/*.js' )
+        .pipe( seajsPackage({
+        	basePath:__dirname+"/src",
+    	}))
+        .pipe( gulp.desk('./build') );
 }); 
 ```
 
 ## API
 
-### seajsCombo( options )
+### seajsPackage( options )
 
 Unsupported files are ignored.
 
 ### options
+
+#### basePath
+Type : `String`
+
+same as seajs.config.base
 
 #### encoding 
 
@@ -58,35 +65,7 @@ If `src/a` and `src/test/a` need ignore `src/test/a`
 ignore : [ 'src/test/a' ]
 ```
 
-#### map
 
-When use `seajs.use`, module id is `foo/bar/biz`, but the module file with respect to `gulp.src` path is `./biz.js`, use `map` configuration.
-
-```
-map : {
-    'foo/bar/biz' : './biz'
-}
-```
-
-#### plugins
-
-`plugins` for special module. A module need combo Handlebars tpl module, but tpl will compile before combo.
-
-```
-var handlebars = require( 'gulp-handlebars' ),
-      wrap = require( 'gulp-wrap' );
-      
-...
-plugins : [{
-    ext : [ '.tpl' ],
-    use : [{
-            plugin : handlebars, 
-        },{
-            plugin : wrap,
-            param : ['define(function(){return Handlebars.template(<%= contents %>)});']
-    }]
-}]
-```
 
 ## Combo rule
 
@@ -111,7 +90,7 @@ gulp code :
 
 ```
 gulp.src( 'src/a.js' )
-    .pipe( seajsCombo() )
+    .pipe( seajsPackage() )
     ...
 ```
 
@@ -137,7 +116,7 @@ Gulp code :
 
 ```
 gulp.src( 'src/main.js' )
-    .pipe( seajsCombo() )
+    .pipe( seajsPackage() )
     ...
 ```
 
@@ -154,14 +133,8 @@ define('a',['b'],function(){
 seajs.use( 'a' );
 ```
 
-The combined module will keep none path id, `src/a` combined id is `a`, `foo/bar/p` combined id is `p`.
 
-If combined module id is duplicate, gulp-seajs-combo will modify original id. `src/a` and `src/test/a` combined id both is `a`, then gulp-seajs-combo will modify `src/test/a` id is `s_gulp_seajs_combo_xx`.
-
-## Parse `seajs.config`
-
-`gulp-seajs-combo` will parse `alias` `vars` `paths` in `seajs.config`, other configuration is ignored, the configuration value must be a `String`, will ignored variable. see more [seajs.config](https://github.com/seajs/seajs/issues/262). [test/src/m.js](https://github.com/chenmnkken/gulp-seajs-combo/blob/master/test/src/m.js) and [test/build/m.js](https://github.com/chenmnkken/gulp-seajs-combo/blob/master/test/build/m.js) is parse example.
 
 ## License
 
-MIT @ [Yiguo Chan](https://github.com/chenmnkken)
+MIT 
