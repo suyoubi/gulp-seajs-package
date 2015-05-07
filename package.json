@@ -1,6 +1,6 @@
 {
   "name": "gulp-seajs-package",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "seajs(CMD) Module combo pulgin for gulp",
   "homepage": "",
   "author": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git://github.com/suyoubi/gulp-seajs-package.git"
   },
   "main": "index.js",
   "keywords": [
