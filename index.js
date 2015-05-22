@@ -22,7 +22,7 @@ var Promise = require( 'promise' ),
     rModId = /([^\\\/?]+?)(\.(?:js))?([\?#].*)?$/,
     rQueryHash = /[\?#].*$/,
     rExistId = /define\(\s*['"][^\[\('"\{\r\n]+['"]\s*,?/,
-    rSeajsUse = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*seajs\.use|(?:^|[^$])\bseajs\.use\s*\((.+)/g,
+    rSeajsUse = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*seajs\.use|(?:^|[^$])\bseajs\.use\s*\(([^\]]+)/g,
 
     rRequire = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*require|(?:^|[^$])\brequire\s*\(\s*(["'])(.+?)\1\s*\)/g;
 
@@ -193,7 +193,7 @@ var filterIgnore = function( ignore, id, origId ){
                 arr = arr.concat( modId );
                 origId = arr.join( '/' );
             }
-            console.info(base, origId);
+
             return {
                 id : item.id,
                 extName : item.extName,
@@ -226,7 +226,6 @@ var filterIgnore = function( ignore, id, origId ){
         if( extName && extName === '.js' ){
             id = id.replace( extName, '' );
         }
-        console.info('modPathResolve', id, filePath, extName);
         return {
             id : id,
             path : filePath,
@@ -453,7 +452,6 @@ var filterIgnore = function( ignore, id, origId ){
             // 为匿名模块添加模块名，同时将依赖列表添加到头部
             contents = contents.replace( rDefine, function(){
                 var id = idMap[ origId ];
-                console.info('idMap', idMap);
                 return deps.length ?
                     "define('" + id + "',['" + deps.join("','") + "']," :
                     "define('" + id + "',";
@@ -473,7 +471,6 @@ var filterIgnore = function( ignore, id, origId ){
                             //depId = depPathResult.id;
                             depId = depPathResult.path;
 
-                            console.info("depPathResult.id",depPathResult);
                             _result = "'" + depId + "'";
                         }
 
@@ -515,9 +512,7 @@ var filterIgnore = function( ignore, id, origId ){
                 else{
                     idUnique[id] = true;
                 }
-                console.info("item", item);
                 idMap[ item.origId ] = item.origId;
-                console.info(idMap);
             }
         });
 
@@ -568,7 +563,6 @@ var filterIgnore = function( ignore, id, origId ){
                 encoding : 'UTF-8',
                 verbose : !!~process.argv.indexOf( '--verbose' )
             };
-        console.info(options.basePath);
         if( options ){
             if( options.basePath ){
               o.basePath = options.basePath;
@@ -597,7 +591,6 @@ var filterIgnore = function( ignore, id, origId ){
                     .then(function(){
                         var contents = comboContent( o );
                         file.contents = contents;
-                        console.info(contents.toString());
                         callback( null, file );
                     })
                     .catch(function( err ){
