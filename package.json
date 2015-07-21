@@ -1,6 +1,6 @@
 {
   "name": "gulp-seajs-package",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "seajs(CMD) Module combo pulgin for gulp",
   "homepage": "",
   "author": {

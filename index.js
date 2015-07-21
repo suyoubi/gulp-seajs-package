@@ -66,7 +66,6 @@ var filterIgnore = function( ignore, id, origId ){
         var name;
 
         o.plugins = {};
-
         options.plugins.forEach(function( item ){
             item.ext.forEach(function( name ){
                 o.plugins[ name ] = item.use;
@@ -86,7 +85,7 @@ var filterIgnore = function( ignore, id, origId ){
         configStr = configStr.replace( /\{/, '' );
         configArr = configStr.split( ',' );
 
-        configArr.forEach(function( item ){
+      configArr.forEach(function( item ){
             var index, arr, key, value;
 
             index = item.indexOf( ':' );
@@ -180,7 +179,8 @@ var filterIgnore = function( ignore, id, origId ){
             }
 
             // 处理seajs.config => paths
-            if( config.paths ){
+
+          if( config.paths ){
                 arr = origId.split( '/' );
                 modId = arr.splice( arr.length - 1, 1 );
 
@@ -201,6 +201,7 @@ var filterIgnore = function( ignore, id, origId ){
                 origId : origId
             };
         });
+
     },
 
     /*
@@ -250,7 +251,8 @@ var filterIgnore = function( ignore, id, origId ){
                     origId = item.origId,
                     contents, stream, plugins, deps, isIgnore;
 
-                isIgnore = options.ignore ?
+
+              isIgnore = options.ignore ?
                     filterIgnore( options.ignore, id, origId ) :
                     false;
 
@@ -270,7 +272,9 @@ var filterIgnore = function( ignore, id, origId ){
 
                 // 处理特殊的模块，如 tpl 模块（需额外的插件支持）
                 // 根据模块后缀来匹配是否使用插件
-                if( extName && !~extName.indexOf('.js') ){
+                if( extName && !~extName.indexOf('.js') && !~extName.indexOf('.css')){
+                    //console.info(item);
+
                     if( options.plugins && options.plugins[extName] ){
                         plugins = options.plugins[extName];
 
@@ -326,7 +330,7 @@ var filterIgnore = function( ignore, id, origId ){
         })
         .catch(function( err ){
             gutil.log( gutil.colors.red( PLUGIN_NAME + ' error: ' + err.message) );
-            console.log( err.stack );
+            //console.log( err.stack );
         });
     },
 
@@ -372,7 +376,6 @@ var filterIgnore = function( ignore, id, origId ){
             id = modData.id,
             deps = [],
             configResult, name, base, matches;
-
         // 标准模块
         if( !isSeajsUse ){
             deps = pullDeps( options, rRequire, contents );
@@ -385,7 +388,6 @@ var filterIgnore = function( ignore, id, origId ){
             for( name in configResult.config ){
                 options.config[ name ] = configResult.config[ name ];
             }
-
             matches = contents.match( rSeajsUse );
 
             matches.forEach(function( item ){
@@ -399,8 +401,9 @@ var filterIgnore = function( ignore, id, origId ){
         }
 
         base = (options.basePath||path.resolve( modData.path, '..' ));
-        deps = mergePath( options, deps, base );
 
+        deps = mergePath( options, deps, base );
+        //console.info(deps);
         options.modArr.push({
             id : id,
             deps : deps,
@@ -409,7 +412,6 @@ var filterIgnore = function( ignore, id, origId ){
             extName : modData.extName,
             origId : modData.origId || id
         });
-
         return deps;
     },
 
@@ -490,7 +492,7 @@ var filterIgnore = function( ignore, id, origId ){
      * param { Object } 配置参数
      * return { String } 文件内容
      */
-    comboContent = function( options ){
+    comboContent = function( options , file){
         var idUnique = {},
             pathUnique = {},
             contents = '',
@@ -515,11 +517,38 @@ var filterIgnore = function( ignore, id, origId ){
                 idMap[ item.origId ] = item.origId;
             }
         });
+      //console.info(file.path);
 
-        newModArr.forEach(function( item ){
+      //var cssPath = file.path.replace(/\.js$/,'.css');
+      //fs.appendFile(filename, data[, options], callback)
+
+      //console.info(options.type);
+
+      if(options.type == "css"){
+        contents = file.contents;
+      }
+
+      newModArr.forEach(function( item ){
             var newContents = transform( options, item, idMap );
-            if( newContents ){
+
+            //console.info(item);
+            /*
+            if(item.extName == '.css'){
+              //fs.appendFile(cssPath, newContents + '\n');
+            }else if( newContents ){
                 contents = newContents + '\n' + contents;
+            }
+            */
+
+            if(options.type == "css"){
+
+              if(item.extName == '.css'&& newContents){
+                contents = newContents + '\n' + contents;
+              }
+            }else{
+              if(item.extName != '.css' && newContents){
+                contents = newContents + '\n' + contents;
+              }
             }
 
             if( options.verbose ){
@@ -527,7 +556,7 @@ var filterIgnore = function( ignore, id, origId ){
             }
         });
 
-        return new Buffer( contents );
+      return new Buffer( contents );
     },
 
     /*
@@ -561,6 +590,7 @@ var filterIgnore = function( ignore, id, origId ){
                 uuid : 0,
                 contents : '',
                 encoding : 'UTF-8',
+                type:"",
                 verbose : !!~process.argv.indexOf( '--verbose' )
             };
         if( options ){
@@ -582,22 +612,63 @@ var filterIgnore = function( ignore, id, origId ){
             if( options.plugins ){
                 initPlugins( options, o );
             }
+
+
+            if( options.type ){
+              o.type = options.type;
+            }
         }
 
         return through.obj(function( file, enc, callback ){
             o.modArr = [];
             if( file.isBuffer() ){
-                parseContent( o, file.contents.toString(), file.path )
+
+                if(options.type == "css"){
+
+                  var jsPath = file.path.replace(/\.css$/,'.js');
+
+                  var jsContents = "";
+                  try{
+                    jsContents = fs.readFileSync( jsPath, options.encoding );
+                  }
+                  catch( _ ){
+                    console.log( "File [" + jsPath + "] not found." );
+                    callback( null, file );
+                    return;
+                  }
+
+                  parseContent( o, jsContents.toString(), jsPath )
                     .then(function(){
-                        var contents = comboContent( o );
-                        file.contents = contents;
-                        callback( null, file );
+                      //console.info(o);
+                      var contents = comboContent( o, file );
+                      file.contents = contents;
+                      callback( null, file );
                     })
                     .catch(function( err ){
-                        gutil.log( gutil.colors.red( PLUGIN_NAME + ' error: ' + err.message) );
-                        console.log( err.stack );
-                        callback( null, file );
+                      gutil.log( gutil.colors.red( PLUGIN_NAME + ' error: ' + err.message) );
+                      console.log( err.stack );
+
+                      callback( null, file );
                     });
+
+
+
+                }else{
+                  parseContent( o, file.contents.toString(), file.path )
+                    .then(function(){
+                      //console.info(o);
+                      var contents = comboContent( o, file );
+                      file.contents = contents;
+                      callback( null, file );
+                    })
+                    .catch(function( err ){
+                      gutil.log( gutil.colors.red( PLUGIN_NAME + ' error: ' + err.message) );
+                      console.log( err.stack );
+
+                      callback( null, file );
+                    });
+                }
+
             }
             else{
                 callback( null, file );
