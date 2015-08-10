@@ -441,7 +441,8 @@ var filterIgnore = function( ignore, id, origId ){
                     depId = idMap[ depOrigId ] || depPathResult.id;
                     deps.push( depId );
 
-                    result = "require('" + depId + "')";
+                    if(/.css$/.test(depId)) result = '';
+                    else result = "require('" + depId + "')";
 
                     if( rFirstStr.test(firstStr) ){
                         result = firstStr + result;
@@ -454,8 +455,13 @@ var filterIgnore = function( ignore, id, origId ){
             // 为匿名模块添加模块名，同时将依赖列表添加到头部
             contents = contents.replace( rDefine, function(){
                 var id = idMap[ origId ];
-                return deps.length ?
-                    "define('" + id + "',['" + deps.join("','") + "']," :
+
+                var jsDeps = deps.filter(function(item){
+                    return !/.css$/.test(item);
+                })
+
+                return jsDeps.length ?
+                    "define('" + id + "',['" + jsDeps.join("','") + "']," :
                     "define('" + id + "',";
             });
         }

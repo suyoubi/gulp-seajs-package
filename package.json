@@ -1,6 +1,6 @@
 {
   "name": "gulp-seajs-package",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "seajs(CMD) Module combo pulgin for gulp",
   "homepage": "",
   "author": {
@@ -23,7 +23,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "glob-stream": "^4.1.1",
+    "glob-stream": "4.1.0",
     "graceful-fs": "^3.0.6",
     "gulp-util": "^3.0.0",
     "promise": "^6.1.0",
